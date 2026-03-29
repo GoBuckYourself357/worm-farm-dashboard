@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Worm Farm Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --soil: #1a110a;
+    --earth: #2e1b0e;
+    --loam: #3d2410;
+    --clay: #5c3317;
+    --bark: #7a4a22;
+    --moss: #4a5e2a;
+    --moss-light: #6b8a3a;
+    --worm: #c0623a;
+    --worm-light: #e07a50;
+    --straw: #d4a84b;
+    --cream: #f2e8d5;
+    --parchment: #ede0c4;
+    --muted: #9a8060;
+    --danger: #c0392b;
+    --ok: #27ae60;
+    --warn: #e67e22;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+
+  body {
+    background: var(--soil);
+    color: var(--cream);
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(94,51,17,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(74,94,42,0.2) 0%, transparent 50%);
+  }
+
+  h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--earth);
+    border-bottom: 2px solid var(--bark);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    gap: 12px;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .logo-icon { font-size: 1.3rem; filter: drop-shadow(0 0 8px rgba(192,98,58,0.6)); }
+  .logo h1 { font-size: 1rem; color: var(--straw); letter-spacing: 0.03em; white-space: nowrap; }
+
+  /* ── TABS ── */
+  nav { display: flex; gap: 4px; flex-shrink: 0; }
+  .tab {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--muted);
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--cream); border-color: var(--bark); }
+  .tab.active { background: var(--loam); color: var(--straw); border-color: var(--bark); }
+
+  /* ── MAIN ── */
+  main { max-width: 1000px; margin: 0 auto; padding: 24px 14px; width: 100%; }
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--earth);
+    border: 1px solid var(--loam);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    min-width: 0;
+  }
+  .card h2 { color: var(--straw); font-size: 1.15rem; margin-bottom: 18px; padding-bottom: 10px; border-bottom: 1px solid var(--loam); }
+  .card h3 { color: var(--parchment); font-size: 1rem; margin-bottom: 12px; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 700px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  /* ── FORM ELEMENTS ── */
+  label { display: block; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; margin-top: 14px; }
+  label:first-child { margin-top: 0; }
+  input, select, textarea {
+    width: 100%;
+    background: var(--loam);
+    border: 1px solid var(--bark);
+    color: var(--cream);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.92rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--worm);
+    box-shadow: 0 0 0 3px rgba(192,98,58,0.2);
+  }
+  select option { background: var(--loam); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--worm);
+    color: white;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 16px;
+  }
+  .btn:hover { background: var(--worm-light); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-moss { background: var(--moss); }
+  .btn-moss:hover { background: var(--moss-light); }
+  .btn-sm { padding: 6px 14px; font-size: 0.78rem; margin-top: 0; }
+
+  /* ── STAT TILES ── */
+  .stat-tile {
+    background: var(--loam);
+    border: 1px solid var(--bark);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-tile .label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .stat-tile .value { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--straw); }
+  .stat-tile .unit { font-size: 0.75rem; color: var(--muted); }
+  .stat-tile.ok .value { color: var(--ok); }
+  .stat-tile.warn .value { color: var(--warn); }
+  .stat-tile.danger .value { color: var(--danger); }
+
+  /* ── STATUS BADGE ── */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-ok { background: rgba(39,174,96,0.2); color: #5dca8a; border: 1px solid rgba(39,174,96,0.4); }
+  .badge-warn { background: rgba(230,126,34,0.2); color: #f0a355; border: 1px solid rgba(230,126,34,0.4); }
+  .badge-danger { background: rgba(192,57,43,0.2); color: #e06050; border: 1px solid rgba(192,57,43,0.4); }
+
+  /* ── LOG ENTRIES ── */
+  .log-entry {
+    background: var(--loam);
+    border: 1px solid var(--bark);
+    border-left: 4px solid var(--worm);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .log-entry .date { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+  .log-entry .readings { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+  .log-entry .reading { font-size: 0.82rem; }
+  .log-entry .reading span { color: var(--straw); font-weight: 700; }
+  .log-entry .notes-text { font-size: 0.82rem; color: var(--muted); margin-top: 4px; font-style: italic; }
+  .log-entry .del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 2px 6px; border-radius: 4px; transition: color 0.2s; flex-shrink: 0; }
+  .log-entry .del-btn:hover { color: var(--danger); }
+
+  /* ── REFERENCE PAGE ── */
+  .ref-section { margin-bottom: 28px; }
+  .ref-section h3 { color: var(--straw); font-size: 1rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .ref-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .ref-table th { background: var(--loam); color: var(--muted); font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--bark); word-wrap: break-word; }
+  .ref-table td { padding: 8px 10px; font-size: 0.82rem; border-bottom: 1px solid rgba(255,255,255,0.04); word-wrap: break-word; vertical-align: top; }
+  .ref-table tr:last-child td { border-bottom: none; }
+  .range-ok { color: #5dca8a; font-weight: 700; }
+  .range-warn { color: #f0a355; }
+
+  .tip-box {
+    background: rgba(74,94,42,0.25);
+    border: 1px solid var(--moss);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .tip-box .tip-head { color: var(--moss-light); font-weight: 700; margin-bottom: 4px; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  .danger-list { list-style: none; }
+  .danger-list li {
+    padding: 8px 14px;
+    margin-bottom: 6px;
+    background: rgba(192,57,43,0.1);
+    border: 1px solid rgba(192,57,43,0.25);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    display: flex;
+    gap: 10px;
+  }
+  .danger-list li::before { content: "✕"; color: var(--danger); font-weight: 700; }
+
+  .green-list { list-style: none; }
+  .green-list li {
+    padding: 8px 14px;
+    margin-bottom: 6px;
+    background: rgba(39,174,96,0.1);
+    border: 1px solid rgba(39,174,96,0.2);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    display: flex;
+    gap: 10px;
+  }
+  .green-list li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+
+  .worm-types { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .worm-card {
+    background: var(--loam);
+    border: 1px solid var(--bark);
+    border-radius: 8px;
+    padding: 14px;
+  }
+  .worm-card .worm-name { color: var(--worm-light); font-weight: 700; font-size: 0.92rem; margin-bottom: 4px; }
+  .worm-card .worm-alias { color: var(--muted); font-size: 0.78rem; margin-bottom: 8px; }
+  .worm-card .worm-detail { font-size: 0.82rem; line-height: 1.6; }
+
+  .suggestion-box {
+    background: rgba(212,168,75,0.1);
+    border: 1px solid rgba(212,168,75,0.35);
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+    animation: fadeIn 0.4s ease;
+  }
+  .suggestion-box .sug-title {
+    color: var(--straw);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sug-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+  .sug-item:last-child { border-bottom: none; }
+  .sug-icon { flex-shrink: 0; font-size: 1rem; }
+  .sug-text { color: var(--cream); }
+  .sug-text strong { color: var(--straw); }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; opacity: 0.4; }
+
+  .health-bar-wrap { margin-top: 8px; }
+  .health-bar-bg { background: var(--loam); border-radius: 4px; height: 8px; overflow: hidden; margin-bottom: 4px; }
+  .health-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+  .health-label { font-size: 0.72rem; color: var(--muted); display: flex; justify-content: space-between; }
+
+  .page-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--straw); margin-bottom: 6px; }
+  .page-subtitle { font-size: 0.85rem; color: var(--muted); margin-bottom: 24px; }
+
+  .divider { border: none; border-top: 1px solid var(--loam); margin: 20px 0; }
+
+  .inline-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .inline-row > * { flex: 1; min-width: 120px; }
+  .inline-row .btn { flex: 0; white-space: nowrap; }
+
+  /* ── HELP BUTTON (nav) ── */
+  #help-btn {
+    background: var(--loam);
+    border: 1px solid var(--bark);
+    color: var(--straw);
+    padding: 7px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  #help-btn:hover { background: var(--clay); color: var(--cream); }
+
+  /* ── HELP PANEL ── */
+  #help-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+    animation: fadeIn 0.2s ease;
+  }
+  #help-overlay.open { display: flex; align-items: flex-end; justify-content: flex-end; padding: 20px; }
+  #help-panel {
+    background: var(--earth);
+    border: 1px solid var(--bark);
+    border-radius: 16px;
+    width: 380px;
+    max-width: calc(100vw - 40px);
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  #help-panel .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--loam);
+    position: sticky;
+    top: 0;
+    background: var(--earth);
+  }
+  #help-panel .panel-header h2 { font-size: 1.1rem; color: var(--straw); }
+  #help-close {
+    background: var(--loam);
+    border: none;
+    color: var(--muted);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+  }
+  #help-close:hover { color: var(--cream); }
+  .help-section { padding: 16px 20px; border-bottom: 1px solid var(--loam); }
+  .help-section:last-child { border-bottom: none; }
+  .help-section h3 { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .help-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .help-row:last-child { border-bottom: none; }
+  .help-row .param { color: var(--parchment); }
+  .help-row .range { font-weight: 700; }
+  .help-row .range.ok { color: var(--ok); }
+  .help-row .range.warn { color: var(--warn); }
+  .help-full-ref-btn {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 0 20px 16px;
+    background: var(--loam);
+    border: 1px solid var(--bark);
+    color: var(--straw);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-align: center;
+  }
+  .help-full-ref-btn:hover { background: var(--clay); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🪱</span>
+    <h1>WormWatch</h1>
+  </div>
+  <nav>
+    <button class="tab active" onclick="showPage('setup')">Setup</button>
+    <button class="tab" onclick="showPage('log')">Log</button>
+    <button id="help-btn" onclick="toggleHelp()">📖 Ref</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ══════════════════════════════════════════
+       SETUP PAGE
+  ══════════════════════════════════════════ -->
+  <div id="page-setup" class="page active">
+    <p class="page-title">Bin Setup</p>
+    <p class="page-subtitle">Configure your tote and colony details — these become the baseline for all readings.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h2>🪣 Container</h2>
+        <label>Container Type</label>
+        <select id="s-container">
+          <option value="Sterilite 66qt Tote">Sterilite 66qt Tote (Walmart)</option>
+          <option value="Sterilite 114qt Tote">Sterilite 114qt Tote (Walmart)</option>
+          <option value="Rubbermaid 18gal">Rubbermaid 18gal</option>
+          <option value="Custom">Custom / Other</option>
+        </select>
+
+        <label>Approx. Bedding Volume (gallons)</label>
+        <input type="number" id="s-volume" placeholder="e.g. 10" min="1" max="100">
+
+        <label>Bedding Material</label>
+        <select id="s-bedding">
+          <option value="Shredded Cardboard">Shredded Cardboard</option>
+          <option value="Coco Coir">Coco Coir</option>
+          <option value="Peat Moss">Peat Moss</option>
+          <option value="Shredded Newspaper">Shredded Newspaper</option>
+          <option value="Garden Soil Mix">Garden Soil Mix</option>
+          <option value="Mixed Bedding">Mixed Bedding</option>
+        </select>
+
+        <label>Setup Date</label>
+        <input type="date" id="s-date">
+      </div>
+
+      <div class="card">
+        <h2>🪱 Colony</h2>
+        <label>Worm Species</label>
+        <select id="s-species">
+          <option value="Red Wigglers (Eisenia fetida)">Red Wigglers (Eisenia fetida) ⭐ Best</option>
+          <option value="European Nightcrawlers (Eisenia hortensis)">European Nightcrawlers (Eisenia hortensis)</option>
+          <option value="African Nightcrawlers (Eudrilus eugeniae)">African Nightcrawlers (Eudrilus eugeniae)</option>
+          <option value="Canadian Nightcrawlers (Lumbricus terrestris)">Canadian Nightcrawlers (Lumbricus terrestris)</option>
+          <option value="Alabama Jumpers (Amynthas agrestis)">Alabama Jumpers (Amynthas agrestis)</option>
+          <option value="Unknown / Mixed">Unknown / Mixed</option>
+        </select>
+
+        <label>Starting Worm Count (approx)</label>
+        <input type="number" id="s-count" placeholder="e.g. 500" min="1">
+
+        <label>Starting Weight (lbs, optional)</label>
+        <input type="number" id="s-weight" placeholder="e.g. 1" step="0.25" min="0">
+
+        <label>Notes on source / condition</label>
+        <textarea id="s-notes" placeholder="e.g. Ordered from Uncle Jim's Worm Farm, arrived healthy"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📍 Current Snapshot</h2>
+      <div id="setup-summary">
+        <div class="empty-state">
+          <div class="icon">📋</div>
+          <div>Fill in your setup above and click Save to see your bin summary here.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="saveSetup()">💾 Save Setup</button>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       LOG PAGE
+  ══════════════════════════════════════════ -->
+  <div id="page-log" class="page">
+    <p class="page-title">Daily Log</p>
+    <p class="page-subtitle">Record readings over time to track trends and catch problems early.</p>
+
+    <div class="card">
+      <h2>➕ New Entry</h2>
+      <div class="grid-3">
+        <div>
+          <label>Date</label>
+          <input type="date" id="l-date">
+        </div>
+        <div>
+          <label>Temperature (°F)</label>
+          <input type="number" id="l-temp" placeholder="65" min="32" max="120" step="0.5">
+        </div>
+        <div>
+          <label>pH</label>
+          <input type="number" id="l-ph" placeholder="6.8" min="0" max="14" step="0.1">
+        </div>
+        <div>
+          <label>Moisture Level</label>
+          <select id="l-moisture">
+            <option value="">— not measured —</option>
+            <option value="Too Dry">Too Dry 🌵</option>
+            <option value="Slightly Dry">Slightly Dry</option>
+            <option value="Just Right">Just Right ✓</option>
+            <option value="Slightly Wet">Slightly Wet</option>
+            <option value="Too Wet">Too Wet 💧</option>
+          </select>
+        </div>
+        <div>
+          <label>Escape Attempts?</label>
+          <select id="l-escape">
+            <option value="None">None 👍</option>
+            <option value="Few">A Few</option>
+            <option value="Many">Many 🚨</option>
+          </select>
+        </div>
+        <div>
+          <label>Food Added?</label>
+          <select id="l-food">
+            <option value="">— none today —</option>
+            <option value="Kitchen scraps">Kitchen Scraps</option>
+            <option value="Coffee grounds">Coffee Grounds</option>
+            <option value="Cardboard/paper">Cardboard / Paper</option>
+            <option value="Fruit/veg">Fruit & Veg</option>
+            <option value="Mixed">Mixed</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label>Notes / Observations</label>
+        <textarea id="l-notes" placeholder="e.g. Added eggshells to raise pH, smelled slightly sour, worms look active..."></textarea>
+      </div>
+      <button class="btn btn-moss" onclick="addLog()">📝 Add Entry</button>
+      <div id="suggestions"></div>
+    </div>
+
+    <div class="card">
+      <h2>📊 Recent Readings</h2>
+      <div id="log-list">
+        <div class="empty-state">
+          <div class="icon">📓</div>
+          <div>No entries yet. Start logging above to track your bin over time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════
+       REFERENCE PAGE
+  ══════════════════════════════════════════ -->
+  <div id="page-reference" class="page">
+    <p class="page-title">Worm Health Reference</p>
+    <p class="page-subtitle">Everything you need to grow a thriving colony fast.</p>
+
+    <!-- Ideal Ranges -->
+    <div class="card">
+      <h2>🎯 Ideal Conditions</h2>
+      <table class="ref-table">
+        <thead>
+          <tr>
+            <th>Parameter</th>
+            <th>Optimal Range</th>
+            <th>Danger Zone</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Temperature</td>
+            <td class="range-ok">55 – 77°F</td>
+            <td class="range-warn">Below 40°F / Above 85°F</td>
+            <td>Peak reproduction at ~70°F. Will die quickly above 95°F.</td>
+          </tr>
+          <tr>
+            <td>pH</td>
+            <td class="range-ok">6.0 – 7.0</td>
+            <td class="range-warn">Below 5.5 / Above 8.0</td>
+            <td>Add crushed eggshells to raise pH; avoid citrus which acidifies fast.</td>
+          </tr>
+          <tr>
+            <td>Moisture</td>
+            <td class="range-ok">70 – 85%</td>
+            <td class="range-warn">Below 60% / Above 90%</td>
+            <td>Bedding should feel like a wrung-out sponge. Never standing water.</td>
+          </tr>
+          <tr>
+            <td>Bedding Depth</td>
+            <td class="range-ok">6 – 12 inches</td>
+            <td class="range-warn">Less than 4 inches</td>
+            <td>Deeper bed = more stable temps and more real estate for the colony.</td>
+          </tr>
+          <tr>
+            <td>Feeding Rate</td>
+            <td class="range-ok">½ weight/day max</td>
+            <td class="range-warn">Overfeeding causes rot & gas</td>
+            <td>1 lb of worms can process ~½ lb of food per day at peak. Start slow.</td>
+          </tr>
+          <tr>
+            <td>Population Density</td>
+            <td class="range-ok">~1 lb per sq ft</td>
+            <td class="range-warn">Over 2 lbs per sq ft</td>
+            <td>Overcrowding slows reproduction and stresses the colony.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <!-- Feed Yes -->
+      <div class="card">
+        <h3>✅ Good Foods</h3>
+        <ul class="green-list">
+          <li>Fruit & vegetable scraps (non-citrus)</li>
+          <li>Coffee grounds & paper filters</li>
+          <li>Tea bags (remove staples)</li>
+          <li>Crushed eggshells (pH buffer)</li>
+          <li>Shredded cardboard & newspaper</li>
+          <li>Bread & grains (small amounts)</li>
+          <li>Aged manure (horse, cow, rabbit)</li>
+          <li>Leaves & grass clippings (no pesticides)</li>
+        </ul>
+      </div>
+
+      <!-- Feed No -->
+      <div class="card">
+        <h3>🚫 Avoid These</h3>
+        <ul class="danger-list">
+          <li>Citrus peels — acidic, drives worms away</li>
+          <li>Onions & garlic — toxic in large amounts</li>
+          <li>Meat, fish, dairy — attracts pests, causes rot</li>
+          <li>Oily / spicy foods</li>
+          <li>Pet waste — disease risk</li>
+          <li>Glossy paper or cardboard</li>
+          <li>Fresh grass clippings in bulk — heats up</li>
+          <li>Any treated/chemically sprayed plant matter</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Escape Troubleshooting -->
+    <div class="card">
+      <h2>🚨 Escape Troubleshooting</h2>
+      <div class="grid-2">
+        <div class="tip-box">
+          <div class="tip-head">Too Acidic</div>
+          Add crushed eggshells or a pinch of garden lime. Check pH — below 6.0 is common when citrus or large amounts of fruit are added.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Too Wet / Anaerobic</div>
+          Add dry shredded cardboard and fluff the bedding. Ensure drainage holes in the bottom. Worms flee when oxygen drops.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Too Hot</div>
+          Move the bin to a cooler location. Basement or garage (not uninsulated in summer) is ideal. Add frozen water bottles to cool quickly.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">New Bin Stress</div>
+          Normal for 1–2 weeks. Leave a lamp shining above the bin overnight — worms instinctively retreat from light.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Overfeeding</div>
+          Wait until previous food is mostly gone. Rotting uneaten food creates gases (ammonia, H₂S) that repel worms.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Vibration / Disturbance</div>
+          Keep the bin away from washing machines, loud music, or frequent foot traffic. Vibrations mimic predators.
+        </div>
+      </div>
+    </div>
+
+    <!-- Worm Species -->
+    <div class="card">
+      <h2>🪱 Common Composting Worms</h2>
+      <div class="worm-types">
+        <div class="worm-card">
+          <div class="worm-name">Red Wigglers ⭐</div>
+          <div class="worm-alias">Eisenia fetida</div>
+          <div class="worm-detail">The gold standard for home composting. Thrives in organic-rich surface layers, reproduces fast, tolerates a wide range of conditions. Ideal for totes.</div>
+        </div>
+        <div class="worm-card">
+          <div class="worm-name">European Nightcrawlers</div>
+          <div class="worm-alias">Eisenia hortensis</div>
+          <div class="worm-detail">Larger than red wigglers. Great compost producers and excellent fishing bait. Slightly cooler temperature preference (50–70°F).</div>
+        </div>
+        <div class="worm-card">
+          <div class="worm-name">African Nightcrawlers</div>
+          <div class="worm-alias">Eudrilus eugeniae</div>
+          <div class="worm-detail">Very fast composters in warm climates. Need temps above 60°F and prefer 70–80°F. Sensitive to cold — not ideal for unheated spaces.</div>
+        </div>
+        <div class="worm-card">
+          <div class="worm-name">Canadian Nightcrawlers</div>
+          <div class="worm-alias">Lumbricus terrestris</div>
+          <div class="worm-detail">Burrowing worms — not ideal for tote composting. They need cool, deep soil (40–60°F). Better for garden beds than bins.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Growth tips -->
+    <div class="card">
+      <h2>📈 Maximize Population Growth</h2>
+      <div class="grid-2">
+        <div class="tip-box">
+          <div class="tip-head">Temperature Sweet Spot</div>
+          Keep the bin at 70–75°F. Red wigglers can double their population in 60–90 days under ideal conditions. Every degree below 60°F slows reproduction noticeably.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Feed Consistently</div>
+          Small, frequent feedings beat large dumps. Bury food in different spots each time — this distributes the colony and prevents anaerobic hot spots.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Darkness Is Key</div>
+          Keep the lid on and the bin in a dark location. Worms that aren't stressed by light stay focused on eating and reproducing.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Harvest Castings Regularly</div>
+          Once castings build up (dark, crumbly, earthy-smelling), migrate worms to fresh bedding. Too many castings inhibit reproduction.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Protein Boost</div>
+          A small amount of cornmeal, oatmeal, or chicken mash mixed into bedding can accelerate breeding cycles. Use sparingly — overuse causes overheating.
+        </div>
+        <div class="tip-box">
+          <div class="tip-head">Ventilation Without Drying</div>
+          Drill ¼" holes in the lid and upper sides. Lay damp burlap or cardboard directly on bedding surface to retain moisture while allowing gas exchange.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- ── FLOATING HELP BUTTON ── -->
+<button id="help-btn" onclick="toggleHelp()" title="Quick Reference">🪱</button>
+
+<!-- ── HELP PANEL OVERLAY ── -->
+<div id="help-overlay" onclick="closeHelpIfOutside(event)">
+  <div id="help-panel">
+    <div class="panel-header">
+      <h2>🎯 Quick Reference</h2>
+      <button id="help-close" onclick="toggleHelp()">✕</button>
+    </div>
+    <div class="help-section">
+      <h3>Ideal Conditions</h3>
+      <div class="help-row"><span class="param">🌡 Temperature</span><span class="range ok">55 – 77°F</span></div>
+      <div class="help-row"><span class="param">🧪 pH</span><span class="range ok">6.0 – 7.0</span></div>
+      <div class="help-row"><span class="param">💧 Moisture</span><span class="range ok">Like a wrung sponge</span></div>
+      <div class="help-row"><span class="param">📏 Bedding Depth</span><span class="range ok">6 – 12 inches</span></div>
+      <div class="help-row"><span class="param">🍽 Feeding Rate</span><span class="range ok">½ their weight/day max</span></div>
+    </div>
+    <div class="help-section">
+      <h3>🚨 They're Escaping Because...</h3>
+      <div class="help-row"><span class="param">pH too low</span><span class="range warn">Add eggshells or lime</span></div>
+      <div class="help-row"><span class="param">Too wet / no air</span><span class="range warn">Add dry cardboard</span></div>
+      <div class="help-row"><span class="param">Too hot</span><span class="range warn">Move somewhere cooler</span></div>
+      <div class="help-row"><span class="param">Overfeeding</span><span class="range warn">Wait for food to clear</span></div>
+      <div class="help-row"><span class="param">New bin stress</span><span class="range warn">Leave a light on overnight</span></div>
+    </div>
+    <div class="help-section">
+      <h3>🚫 Never Feed Them</h3>
+      <div class="help-row"><span class="param">Citrus, onions, garlic</span></div>
+      <div class="help-row"><span class="param">Meat, fish, dairy</span></div>
+      <div class="help-row"><span class="param">Oily or spicy food</span></div>
+      <div class="help-row"><span class="param">Pet waste</span></div>
+    </div>
+    <button class="help-full-ref-btn" onclick="goToReference()">📖 Full Reference Page →</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────
+let setup = JSON.parse(localStorage.getItem('ww-setup') || 'null');
+let logs  = JSON.parse(localStorage.getItem('ww-logs')  || '[]');
+
+// ── HELP PANEL ─────────────────────────────────────
+function toggleHelp() {
+  const o = document.getElementById('help-overlay');
+  o.classList.toggle('open');
+}
+function closeHelpIfOutside(e) {
+  if (e.target === document.getElementById('help-overlay')) toggleHelp();
+}
+function goToReference() {
+  toggleHelp();
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-reference').classList.add('active');
+}
+
+// ── TABS ───────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── SETUP ──────────────────────────────────────────
+function saveSetup() {
+  setup = {
+    container: document.getElementById('s-container').value,
+    volume:    document.getElementById('s-volume').value,
+    bedding:   document.getElementById('s-bedding').value,
+    date:      document.getElementById('s-date').value,
+    species:   document.getElementById('s-species').value,
+    count:     document.getElementById('s-count').value,
+    weight:    document.getElementById('s-weight').value,
+    notes:     document.getElementById('s-notes').value,
+  };
+  localStorage.setItem('ww-setup', JSON.stringify(setup));
+  renderSummary();
+  alert('✅ Setup saved!');
+}
+
+function renderSummary() {
+  if (!setup || !setup.species) return;
+  const el = document.getElementById('setup-summary');
+  const daysOld = setup.date
+    ? Math.floor((Date.now() - new Date(setup.date)) / 86400000)
+    : '?';
+  el.innerHTML = `
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="stat-tile">
+        <div class="label">Bin Age</div>
+        <div class="value">${daysOld}</div>
+        <div class="unit">days</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Starting Count</div>
+        <div class="value">${setup.count || '—'}</div>
+        <div class="unit">worms</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Volume</div>
+        <div class="value">${setup.volume || '—'}</div>
+        <div class="unit">gallons</div>
+      </div>
+    </div>
+    <div style="font-size:0.88rem; line-height:1.8; color:var(--muted)">
+      <strong style="color:var(--cream)">Container:</strong> ${setup.container} &nbsp;|&nbsp;
+      <strong style="color:var(--cream)">Bedding:</strong> ${setup.bedding} &nbsp;|&nbsp;
+      <strong style="color:var(--cream)">Species:</strong> ${setup.species}
+      ${setup.notes ? `<br><em style="color:var(--muted)">${setup.notes}</em>` : ''}
+    </div>
+  `;
+}
+
+// ── LOG ────────────────────────────────────────────
+function addLog() {
+  const entry = {
+    id:       Date.now(),
+    date:     document.getElementById('l-date').value || new Date().toISOString().split('T')[0],
+    temp:     document.getElementById('l-temp').value,
+    ph:       document.getElementById('l-ph').value,
+    moisture: document.getElementById('l-moisture').value,
+    escape:   document.getElementById('l-escape').value,
+    food:     document.getElementById('l-food').value,
+    notes:    document.getElementById('l-notes').value,
+  };
+  logs.unshift(entry);
+  localStorage.setItem('ww-logs', JSON.stringify(logs));
+  renderLogs();
+  showSuggestions(entry);
+  // clear fields
+  ['l-temp','l-ph','l-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('l-moisture').value = '';
+  document.getElementById('l-escape').value = 'None';
+  document.getElementById('l-food').value = '';
+}
+
+function showSuggestions(e) {
+  const tips = [];
+
+  // Temperature
+  if (e.temp) {
+    const t = parseFloat(e.temp);
+    if (t > 85)       tips.push({ icon: '🌡', text: '<strong>Too hot</strong> — move the bin somewhere cooler. Add frozen water bottles to drop temp fast. Ideal is 55–77°F.' });
+    else if (t > 77)  tips.push({ icon: '🌡', text: '<strong>Getting warm</strong> — keep an eye on it. Move away from heat sources and ensure good airflow.' });
+    else if (t < 40)  tips.push({ icon: '❄️', text: '<strong>Dangerously cold</strong> — bring the bin indoors immediately. Activity stops below 40°F and worms can die.' });
+    else if (t < 55)  tips.push({ icon: '🌡', text: '<strong>Too cool</strong> — worms will slow down significantly. Move to a warmer spot or insulate the bin with a blanket.' });
+  }
+
+  // pH
+  if (e.ph) {
+    const p = parseFloat(e.ph);
+    if (p < 5.5)      tips.push({ icon: '🧪', text: '<strong>pH critically low</strong> — add crushed eggshells, agricultural lime, or baking soda (sparingly). Stop adding fruit scraps for now.' });
+    else if (p < 6.0) tips.push({ icon: '🧪', text: '<strong>pH a bit low</strong> — sprinkle crushed eggshells on the bedding. Avoid citrus and onions until it stabilizes.' });
+    else if (p > 8.0) tips.push({ icon: '🧪', text: '<strong>pH too high</strong> — add a small amount of peat moss or coffee grounds to acidify. Avoid lime or eggshells for now.' });
+    else if (p > 7.0) tips.push({ icon: '🧪', text: '<strong>pH slightly high</strong> — add coffee grounds or a little peat moss to bring it back toward neutral.' });
+  }
+
+  // Moisture
+  if (e.moisture === 'Too Dry' || e.moisture === 'Slightly Dry') {
+    tips.push({ icon: '💧', text: `<strong>${e.moisture}</strong> — mist the bedding lightly with dechlorinated water. Add damp shredded cardboard to hold moisture longer.` });
+  } else if (e.moisture === 'Too Wet') {
+    tips.push({ icon: '💧', text: '<strong>Too wet</strong> — add dry shredded cardboard or newspaper to absorb excess moisture. Check that drainage holes aren\'t clogged. Stop watering until it improves.' });
+  } else if (e.moisture === 'Slightly Wet') {
+    tips.push({ icon: '💧', text: '<strong>Slightly wet</strong> — add a handful of dry cardboard and leave the lid slightly ajar for a few hours to let excess moisture escape.' });
+  }
+
+  // Escapes
+  if (e.escape === 'Few') {
+    tips.push({ icon: '🪱', text: '<strong>Some escaping</strong> — check pH and moisture first, they\'re the most common culprits. Leave a light on above the bin overnight to discourage crawling.' });
+  } else if (e.escape === 'Many') {
+    tips.push({ icon: '🚨', text: '<strong>Many escaping</strong> — something is wrong with the environment. Check pH (should be 6–7), moisture (wrung sponge), and temp (55–77°F). Remove any rotting food immediately and add fresh dry bedding.' });
+  }
+
+  // No food logged
+  if (!e.food) {
+    tips.push({ icon: '🥬', text: '<strong>No food added today</strong> — that\'s fine if you fed recently, but make sure worms always have something to process. Feed when previous food is about 80% gone.' });
+  }
+
+  // All good
+  if (tips.length === 0) {
+    tips.push({ icon: '✅', text: '<strong>Conditions look great!</strong> Keep doing what you\'re doing. Check again tomorrow and watch for castings building up — harvest when the bin is about ⅔ full of finished compost.' });
+  }
+
+  const box = document.getElementById('suggestions');
+  box.innerHTML = `
+    <div class="suggestion-box">
+      <div class="sug-title">💡 Suggestions Based on This Entry</div>
+      ${tips.map(t => `<div class="sug-item"><span class="sug-icon">${t.icon}</span><span class="sug-text">${t.text}</span></div>`).join('')}
+    </div>
+  `;
+}
+
+function deleteLog(id) {
+  logs = logs.filter(e => e.id !== id);
+  localStorage.setItem('ww-logs', JSON.stringify(logs));
+  renderLogs();
+}
+
+function phStatus(ph) {
+  if (!ph) return '';
+  const v = parseFloat(ph);
+  if (v >= 6.0 && v <= 7.0) return 'ok';
+  if (v >= 5.5 && v <= 7.5) return 'warn';
+  return 'danger';
+}
+
+function tempStatus(t) {
+  if (!t) return '';
+  const v = parseFloat(t);
+  if (v >= 55 && v <= 77) return 'ok';
+  if (v >= 45 && v <= 84) return 'warn';
+  return 'danger';
+}
+
+function escBadge(e) {
+  if (e === 'None') return '<span class="badge badge-ok">No Escapes</span>';
+  if (e === 'Few')  return '<span class="badge badge-warn">Few Escapes</span>';
+  if (e === 'Many') return '<span class="badge badge-danger">⚠ Many Escapes</span>';
+  return '';
+}
+
+function renderLogs() {
+  const el = document.getElementById('log-list');
+  if (!logs.length) {
+    el.innerHTML = `<div class="empty-state"><div class="icon">📓</div><div>No entries yet.</div></div>`;
+    return;
+  }
+  el.innerHTML = logs.map(e => `
+    <div class="log-entry">
+      <div style="flex:1">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px">
+          <strong style="color:var(--parchment)">${e.date}</strong>
+          ${escBadge(e.escape)}
+        </div>
+        <div class="readings">
+          ${e.temp ? `<div class="reading">🌡 Temp: <span class="${tempStatus(e.temp)}" style="${tempStatus(e.temp)==='ok'?'color:var(--ok)':tempStatus(e.temp)==='warn'?'color:var(--warn)':'color:var(--danger)'}">${e.temp}°F</span></div>` : ''}
+          ${e.ph ? `<div class="reading">🧪 pH: <span style="${phStatus(e.ph)==='ok'?'color:var(--ok)':phStatus(e.ph)==='warn'?'color:var(--warn)':'color:var(--danger)'}">${e.ph}</span></div>` : ''}
+          ${e.moisture ? `<div class="reading">💧 Moisture: <span>${e.moisture}</span></div>` : ''}
+          ${e.food ? `<div class="reading">🥬 Fed: <span>${e.food}</span></div>` : ''}
+        </div>
+        ${e.notes ? `<div class="notes-text">${e.notes}</div>` : ''}
+      </div>
+      <button class="del-btn" onclick="deleteLog(${e.id})" title="Delete">✕</button>
+    </div>
+  `).join('');
+}
+
+// ── INIT ───────────────────────────────────────────
+(function init() {
+  // Set today's date as default in log form
+  document.getElementById('l-date').value = new Date().toISOString().split('T')[0];
+  if (setup) {
+    document.getElementById('s-container').value = setup.container || '';
+    document.getElementById('s-volume').value    = setup.volume    || '';
+    document.getElementById('s-bedding').value   = setup.bedding   || '';
+    document.getElementById('s-date').value      = setup.date      || '';
+    document.getElementById('s-species').value   = setup.species   || '';
+    document.getElementById('s-count').value     = setup.count     || '';
+    document.getElementById('s-weight').value    = setup.weight    || '';
+    document.getElementById('s-notes').value     = setup.notes     || '';
+    renderSummary();
+  } else {
+    document.getElementById('s-date').value = new Date().toISOString().split('T')[0];
+  }
+  renderLogs();
+})();
+</script>
+</body>
+</html>
